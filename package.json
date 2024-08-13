@@ -1,0 +1,33 @@
+{
+  "name": "kubernetes",
+  "version": "1.0.0",
+  "main": "dist/main.js",
+  "scripts": {
+  "start": "npm run build && electron .",
+  "build": "tsc && webpack && tsc src/preload.ts --outDir dist",
+  "watch": "tsc -w & webpack --watch",
+   "copy-assets": "cp -r assets dist/ && cp closeDialog.html dist/"
+},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@material-ui/core": "^4.12.4",
+    "@material-ui/icons": "^4.11.3",
+    "@types/react": "^17.0.80",
+    "@types/react-dom": "^18.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.1.0",
+    "@typescript-eslint/parser": "^8.1.0",
+    "electron": "^31.3.1",
+    "electron-builder": "^24.13.3",
+    "eslint": "^9.9.0",
+    "eslint-plugin-react": "^7.35.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.5.4",
+    "webpack": "^5.93.0",
+    "webpack-cli": "^5.1.4"
+  }
+}
