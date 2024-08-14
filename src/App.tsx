@@ -22,6 +22,8 @@ import {
   Storage as StorageIcon,
 } from "@material-ui/icons";
 import React, { useState } from "react";
+import Dashboard from "./Dashboard";
+import Workloads from "./Workloads";
 
 const { ipcRenderer } = window.require("electron");
 
@@ -73,9 +75,9 @@ const App: React.FC = () => {
   const renderContent = () => {
     switch (selectedItem) {
       case "Dashboard":
-        return <Typography variant="h4">Dashboard Content</Typography>;
+        return <Dashboard />;
       case "Workloads":
-        return <Typography variant="h4">Workloads Content</Typography>;
+        return <Workloads />;
       case "Storage":
         return <Typography variant="h4">Storage Content</Typography>;
       case "Service Discovery":
