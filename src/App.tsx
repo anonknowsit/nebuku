@@ -23,6 +23,8 @@ import {
 } from "@material-ui/icons";
 import React, { useState } from "react";
 import Dashboard from "./Dashboard";
+import ServiceDiscovery from "./ServiceDiscovery";
+import Storage from "./Storage";
 import Workloads from "./Workloads";
 
 const { ipcRenderer } = window.require("electron");
@@ -79,9 +81,9 @@ const App: React.FC = () => {
       case "Workloads":
         return <Workloads />;
       case "Storage":
-        return <Typography variant="h4">Storage Content</Typography>;
+        return <Storage />;
       case "Service Discovery":
-        return <Typography variant="h4">Service Discovery Content</Typography>;
+        return <ServiceDiscovery />;
       default:
         return <Typography variant="h4">Select an item</Typography>;
     }
