@@ -1,20 +1,17 @@
 import {
-  Box,
   createStyles,
   makeStyles,
   Paper,
-  Tab,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
   Theme,
   Typography,
 } from "@material-ui/core";
-import React, { useState } from "react";
+import React from "react";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -28,41 +25,15 @@ const useStyles = makeStyles((theme: Theme) =>
     table: {
       minWidth: 650,
     },
-    tabContent: {
-      marginTop: theme.spacing(2),
-    },
   })
 );
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: any;
-  value: any;
+interface WorkloadsProps {
+  subItem: string;
 }
 
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box p={3}>{children}</Box>}
-    </div>
-  );
-}
-
-const Workloads: React.FC = () => {
+const Workloads: React.FC<WorkloadsProps> = ({ subItem }) => {
   const classes = useStyles();
-  const [value, setValue] = useState(0);
-
-  const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
-    setValue(newValue);
-  };
 
   // Dummy data
   const deployments = [
@@ -124,77 +95,129 @@ const Workloads: React.FC = () => {
     },
   ];
 
+  const recentWorkloads = [
+    {
+      name: "new-frontend",
+      type: "Deployment",
+      namespace: "default",
+      age: "2h",
+    },
+    {
+      name: "cache-service",
+      type: "StatefulSet",
+      namespace: "caching",
+      age: "5h",
+    },
+    {
+      name: "monitoring-agent",
+      type: "DaemonSet",
+      namespace: "monitoring",
+      age: "1d",
+    },
+  ];
+
+  const renderOverview = () => (
+    <>
+      <Typography variant="h6" className={classes.title}>
+        Recently Deployed Workloads
+      </Typography>
+      <TableContainer component={Paper}>
+        <Table className={classes.table} aria-label="recent workloads table">
+          <TableHead>
+            <TableRow>
+              <TableCell>Name</TableCell>
+              <TableCell>Type</TableCell>
+              <TableCell>Namespace</TableCell>
+              <TableCell>Age</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {recentWorkloads.map((workload) => (
+              <TableRow key={workload.name}>
+                <TableCell component="th" scope="row">
+                  {workload.name}
+                </TableCell>
+                <TableCell>{workload.type}</TableCell>
+                <TableCell>{workload.namespace}</TableCell>
+                <TableCell>{workload.age}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </>
+  );
+
+  const renderDeployments = () => (
+    <TableContainer component={Paper}>
+      <Table className={classes.table} aria-label="deployments table">
+        <TableHead>
+          <TableRow>
+            <TableCell>Name</TableCell>
+            <TableCell align="right">Replicas</TableCell>
+            <TableCell align="right">Available</TableCell>
+            <TableCell align="right">Up-to-date</TableCell>
+            <TableCell>Status</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {deployments.map((deployment) => (
+            <TableRow key={deployment.name}>
+              <TableCell component="th" scope="row">
+                {deployment.name}
+              </TableCell>
+              <TableCell align="right">{deployment.replicas}</TableCell>
+              <TableCell align="right">
+                {deployment.availableReplicas}
+              </TableCell>
+              <TableCell align="right">{deployment.updatedReplicas}</TableCell>
+              <TableCell>{deployment.status}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+
+  const renderPods = () => (
+    <TableContainer component={Paper}>
+      <Table className={classes.table} aria-label="pods table">
+        <TableHead>
+          <TableRow>
+            <TableCell>Name</TableCell>
+            <TableCell>Status</TableCell>
+            <TableCell align="right">Restarts</TableCell>
+            <TableCell>Age</TableCell>
+            <TableCell>CPU</TableCell>
+            <TableCell>Memory</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {pods.map((pod) => (
+            <TableRow key={pod.name}>
+              <TableCell component="th" scope="row">
+                {pod.name}
+              </TableCell>
+              <TableCell>{pod.status}</TableCell>
+              <TableCell align="right">{pod.restarts}</TableCell>
+              <TableCell>{pod.age}</TableCell>
+              <TableCell>{pod.cpu}</TableCell>
+              <TableCell>{pod.memory}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+
   return (
     <div className={classes.root}>
       <Typography variant="h4" className={classes.title}>
-        Workloads
+        Workloads - {subItem}
       </Typography>
-      <Tabs value={value} onChange={handleChange} aria-label="workloads tabs">
-        <Tab label="Deployments" />
-        <Tab label="Pods" />
-      </Tabs>
-      <TabPanel value={value} index={0}>
-        <TableContainer component={Paper}>
-          <Table className={classes.table} aria-label="deployments table">
-            <TableHead>
-              <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell align="right">Replicas</TableCell>
-                <TableCell align="right">Available</TableCell>
-                <TableCell align="right">Up-to-date</TableCell>
-                <TableCell>Status</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {deployments.map((deployment) => (
-                <TableRow key={deployment.name}>
-                  <TableCell component="th" scope="row">
-                    {deployment.name}
-                  </TableCell>
-                  <TableCell align="right">{deployment.replicas}</TableCell>
-                  <TableCell align="right">
-                    {deployment.availableReplicas}
-                  </TableCell>
-                  <TableCell align="right">
-                    {deployment.updatedReplicas}
-                  </TableCell>
-                  <TableCell>{deployment.status}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </TabPanel>
-      <TabPanel value={value} index={1}>
-        <TableContainer component={Paper}>
-          <Table className={classes.table} aria-label="pods table">
-            <TableHead>
-              <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell align="right">Restarts</TableCell>
-                <TableCell>Age</TableCell>
-                <TableCell>CPU</TableCell>
-                <TableCell>Memory</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {pods.map((pod) => (
-                <TableRow key={pod.name}>
-                  <TableCell component="th" scope="row">
-                    {pod.name}
-                  </TableCell>
-                  <TableCell>{pod.status}</TableCell>
-                  <TableCell align="right">{pod.restarts}</TableCell>
-                  <TableCell>{pod.age}</TableCell>
-                  <TableCell>{pod.cpu}</TableCell>
-                  <TableCell>{pod.memory}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </TabPanel>
+      {subItem === "Overview" && renderOverview()}
+      {subItem === "Deployments" && renderDeployments()}
+      {subItem === "Pods" && renderPods()}
     </div>
   );
 };

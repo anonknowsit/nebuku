@@ -1,20 +1,17 @@
 import {
-  Box,
   createStyles,
   makeStyles,
   Paper,
-  Tab,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
   Theme,
   Typography,
 } from "@material-ui/core";
-import React, { useState } from "react";
+import React from "react";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -28,70 +25,17 @@ const useStyles = makeStyles((theme: Theme) =>
     table: {
       minWidth: 650,
     },
-    tabContent: {
-      marginTop: theme.spacing(2),
-    },
   })
 );
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: any;
-  value: any;
+interface ServiceDiscoveryProps {
+  subItem: string;
 }
 
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box p={3}>{children}</Box>}
-    </div>
-  );
-}
-
-const ServiceDiscovery: React.FC = () => {
+const ServiceDiscovery: React.FC<ServiceDiscoveryProps> = ({ subItem }) => {
   const classes = useStyles();
-  const [value, setValue] = useState(0);
-
-  const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
-    setValue(newValue);
-  };
 
   // Dummy data
-  const ingresses = [
-    {
-      name: "main-ingress",
-      namespace: "default",
-      hosts: ["example.com"],
-      address: "10.0.0.1",
-      ports: "80, 443",
-      age: "5d",
-    },
-    {
-      name: "api-ingress",
-      namespace: "api",
-      hosts: ["api.example.com"],
-      address: "10.0.0.2",
-      ports: "443",
-      age: "2d",
-    },
-    {
-      name: "admin-ingress",
-      namespace: "admin",
-      hosts: ["admin.example.com"],
-      address: "10.0.0.3",
-      ports: "443",
-      age: "1w",
-    },
-  ];
-
   const services = [
     {
       name: "frontend-svc",
@@ -131,81 +75,161 @@ const ServiceDiscovery: React.FC = () => {
     },
   ];
 
+  const ingresses = [
+    {
+      name: "main-ingress",
+      namespace: "default",
+      hosts: ["example.com"],
+      address: "10.0.0.1",
+      ports: "80, 443",
+      age: "5d",
+    },
+    {
+      name: "api-ingress",
+      namespace: "api",
+      hosts: ["api.example.com"],
+      address: "10.0.0.2",
+      ports: "443",
+      age: "2d",
+    },
+    {
+      name: "admin-ingress",
+      namespace: "admin",
+      hosts: ["admin.example.com"],
+      address: "10.0.0.3",
+      ports: "443",
+      age: "1w",
+    },
+  ];
+
+  const recentServiceDiscoveryResources = [
+    {
+      name: "new-frontend-svc",
+      type: "Service",
+      namespace: "default",
+      age: "2h",
+    },
+    {
+      name: "api-gateway-ingress",
+      type: "Ingress",
+      namespace: "api",
+      age: "5h",
+    },
+    {
+      name: "metrics-svc",
+      type: "Service",
+      namespace: "monitoring",
+      age: "1d",
+    },
+  ];
+
+  const renderOverview = () => (
+    <>
+      <Typography variant="h6" className={classes.title}>
+        Recently Created Service Discovery Resources
+      </Typography>
+      <TableContainer component={Paper}>
+        <Table
+          className={classes.table}
+          aria-label="recent service discovery resources table"
+        >
+          <TableHead>
+            <TableRow>
+              <TableCell>Name</TableCell>
+              <TableCell>Type</TableCell>
+              <TableCell>Namespace</TableCell>
+              <TableCell>Age</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {recentServiceDiscoveryResources.map((resource) => (
+              <TableRow key={resource.name}>
+                <TableCell component="th" scope="row">
+                  {resource.name}
+                </TableCell>
+                <TableCell>{resource.type}</TableCell>
+                <TableCell>{resource.namespace}</TableCell>
+                <TableCell>{resource.age}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </>
+  );
+
+  const renderServices = () => (
+    <TableContainer component={Paper}>
+      <Table className={classes.table} aria-label="services table">
+        <TableHead>
+          <TableRow>
+            <TableCell>Name</TableCell>
+            <TableCell>Namespace</TableCell>
+            <TableCell>Type</TableCell>
+            <TableCell>Cluster IP</TableCell>
+            <TableCell>External IP</TableCell>
+            <TableCell>Ports</TableCell>
+            <TableCell>Age</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {services.map((service) => (
+            <TableRow key={service.name}>
+              <TableCell component="th" scope="row">
+                {service.name}
+              </TableCell>
+              <TableCell>{service.namespace}</TableCell>
+              <TableCell>{service.type}</TableCell>
+              <TableCell>{service.clusterIP}</TableCell>
+              <TableCell>{service.externalIP}</TableCell>
+              <TableCell>{service.ports}</TableCell>
+              <TableCell>{service.age}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+
+  const renderIngresses = () => (
+    <TableContainer component={Paper}>
+      <Table className={classes.table} aria-label="ingresses table">
+        <TableHead>
+          <TableRow>
+            <TableCell>Name</TableCell>
+            <TableCell>Namespace</TableCell>
+            <TableCell>Hosts</TableCell>
+            <TableCell>Address</TableCell>
+            <TableCell>Ports</TableCell>
+            <TableCell>Age</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {ingresses.map((ingress) => (
+            <TableRow key={ingress.name}>
+              <TableCell component="th" scope="row">
+                {ingress.name}
+              </TableCell>
+              <TableCell>{ingress.namespace}</TableCell>
+              <TableCell>{ingress.hosts.join(", ")}</TableCell>
+              <TableCell>{ingress.address}</TableCell>
+              <TableCell>{ingress.ports}</TableCell>
+              <TableCell>{ingress.age}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+
   return (
     <div className={classes.root}>
       <Typography variant="h4" className={classes.title}>
-        Service Discovery
+        Service Discovery - {subItem}
       </Typography>
-      <Tabs
-        value={value}
-        onChange={handleChange}
-        aria-label="service discovery tabs"
-      >
-        <Tab label="Ingresses" />
-        <Tab label="Services" />
-      </Tabs>
-      <TabPanel value={value} index={0}>
-        <TableContainer component={Paper}>
-          <Table className={classes.table} aria-label="ingresses table">
-            <TableHead>
-              <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Namespace</TableCell>
-                <TableCell>Hosts</TableCell>
-                <TableCell>Address</TableCell>
-                <TableCell>Ports</TableCell>
-                <TableCell>Age</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {ingresses.map((ingress) => (
-                <TableRow key={ingress.name}>
-                  <TableCell component="th" scope="row">
-                    {ingress.name}
-                  </TableCell>
-                  <TableCell>{ingress.namespace}</TableCell>
-                  <TableCell>{ingress.hosts.join(", ")}</TableCell>
-                  <TableCell>{ingress.address}</TableCell>
-                  <TableCell>{ingress.ports}</TableCell>
-                  <TableCell>{ingress.age}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </TabPanel>
-      <TabPanel value={value} index={1}>
-        <TableContainer component={Paper}>
-          <Table className={classes.table} aria-label="services table">
-            <TableHead>
-              <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Namespace</TableCell>
-                <TableCell>Type</TableCell>
-                <TableCell>Cluster IP</TableCell>
-                <TableCell>External IP</TableCell>
-                <TableCell>Ports</TableCell>
-                <TableCell>Age</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {services.map((service) => (
-                <TableRow key={service.name}>
-                  <TableCell component="th" scope="row">
-                    {service.name}
-                  </TableCell>
-                  <TableCell>{service.namespace}</TableCell>
-                  <TableCell>{service.type}</TableCell>
-                  <TableCell>{service.clusterIP}</TableCell>
-                  <TableCell>{service.externalIP}</TableCell>
-                  <TableCell>{service.ports}</TableCell>
-                  <TableCell>{service.age}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </TabPanel>
+      {subItem === "Overview" && renderOverview()}
+      {subItem === "Services" && renderServices()}
+      {subItem === "Ingresses" && renderIngresses()}
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import {
   AppBar,
+  Collapse,
   Container,
   createStyles,
   Drawer,
@@ -17,6 +18,8 @@ import {
   Close as CloseIcon,
   Cloud as CloudIcon,
   Dashboard as DashboardIcon,
+  ExpandLess,
+  ExpandMore,
   Crop169 as MaximizeIcon,
   Remove as MinimizeIcon,
   Storage as StorageIcon,
@@ -29,7 +32,7 @@ import Workloads from "./Workloads";
 
 const { ipcRenderer } = window.require("electron");
 
-const drawerWidth = 240;
+const drawerWidth = 260;
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -60,30 +63,75 @@ const useStyles = makeStyles((theme: Theme) =>
       alignItems: "center",
       WebkitAppRegion: "no-drag" as any,
     },
+    nested: {
+      paddingLeft: theme.spacing(4),
+    },
+    listItemText: {
+      marginLeft: -theme.spacing(2),
+    },
+    listItemIcon: {
+      minWidth: 40,
+    },
   })
 );
 
 const App: React.FC = () => {
   const classes = useStyles();
   const [selectedItem, setSelectedItem] = useState("Dashboard");
+  const [workloadsOpen, setWorkloadsOpen] = useState(false);
+  const [storageOpen, setStorageOpen] = useState(false);
+  const [serviceDiscoveryOpen, setServiceDiscoveryOpen] = useState(false);
 
   const menuItems = [
     { name: "Dashboard", icon: <DashboardIcon /> },
-    { name: "Workloads", icon: <CloudIcon /> },
-    { name: "Storage", icon: <StorageIcon /> },
-    { name: "Service Discovery", icon: <CloudIcon /> },
+    {
+      name: "Workloads",
+      icon: <CloudIcon />,
+      subItems: ["Overview", "Deployments", "Pods"],
+    },
+    {
+      name: "Storage",
+      icon: <StorageIcon />,
+      subItems: [
+        "Overview",
+        "ConfigMaps",
+        "Secrets",
+        "Persistent Volume Claims",
+      ],
+    },
+    {
+      name: "Service Discovery",
+      icon: <CloudIcon />,
+      subItems: ["Overview", "Services", "Ingresses"],
+    },
   ];
 
+  const handleWorkloadsClick = () => {
+    setWorkloadsOpen(!workloadsOpen);
+    setSelectedItem("Workloads/Overview");
+  };
+
+  const handleStorageClick = () => {
+    setStorageOpen(!storageOpen);
+    setSelectedItem("Storage/Overview");
+  };
+
+  const handleServiceDiscoveryClick = () => {
+    setServiceDiscoveryOpen(!serviceDiscoveryOpen);
+    setSelectedItem("Service Discovery/Overview");
+  };
+
   const renderContent = () => {
-    switch (selectedItem) {
+    const [mainItem, subItem] = selectedItem.split("/");
+    switch (mainItem) {
       case "Dashboard":
         return <Dashboard />;
       case "Workloads":
-        return <Workloads />;
+        return <Workloads subItem={subItem || "Overview"} />;
       case "Storage":
-        return <Storage />;
+        return <Storage subItem={subItem || "Overview"} />;
       case "Service Discovery":
-        return <ServiceDiscovery />;
+        return <ServiceDiscovery subItem={subItem || "Overview"} />;
       default:
         return <Typography variant="h4">Select an item</Typography>;
     }
@@ -131,15 +179,71 @@ const App: React.FC = () => {
         <div className={classes.toolbar} />
         <List>
           {menuItems.map((item) => (
-            <ListItem
-              button
-              key={item.name}
-              onClick={() => setSelectedItem(item.name)}
-              selected={selectedItem === item.name}
-            >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.name} />
-            </ListItem>
+            <React.Fragment key={item.name}>
+              <ListItem
+                button
+                onClick={
+                  item.name === "Workloads"
+                    ? handleWorkloadsClick
+                    : item.name === "Storage"
+                    ? handleStorageClick
+                    : item.name === "Service Discovery"
+                    ? handleServiceDiscoveryClick
+                    : () => setSelectedItem(item.name)
+                }
+                selected={selectedItem.startsWith(item.name)}
+              >
+                <ListItemIcon>{item.icon}</ListItemIcon>
+                <ListItemText primary={item.name} />
+                {item.subItems &&
+                  (item.name === "Workloads" ? (
+                    workloadsOpen ? (
+                      <ExpandLess />
+                    ) : (
+                      <ExpandMore />
+                    )
+                  ) : item.name === "Storage" ? (
+                    storageOpen ? (
+                      <ExpandLess />
+                    ) : (
+                      <ExpandMore />
+                    )
+                  ) : serviceDiscoveryOpen ? (
+                    <ExpandLess />
+                  ) : (
+                    <ExpandMore />
+                  ))}
+              </ListItem>
+              {item.subItems && (
+                <Collapse
+                  in={
+                    item.name === "Workloads"
+                      ? workloadsOpen
+                      : item.name === "Storage"
+                      ? storageOpen
+                      : serviceDiscoveryOpen
+                  }
+                  timeout="auto"
+                  unmountOnExit
+                >
+                  <List component="div" disablePadding>
+                    {item.subItems.map((subItem) => (
+                      <ListItem
+                        button
+                        className={classes.nested}
+                        key={subItem}
+                        onClick={() =>
+                          setSelectedItem(`${item.name}/${subItem}`)
+                        }
+                        selected={selectedItem === `${item.name}/${subItem}`}
+                      >
+                        <ListItemText primary={subItem} />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Collapse>
+              )}
+            </React.Fragment>
           ))}
         </List>
       </Drawer>

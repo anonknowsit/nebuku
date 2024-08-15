@@ -1,20 +1,17 @@
 import {
-  Box,
   createStyles,
   makeStyles,
   Paper,
-  Tab,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
   Theme,
   Typography,
 } from "@material-ui/core";
-import React, { useState } from "react";
+import React from "react";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -28,41 +25,15 @@ const useStyles = makeStyles((theme: Theme) =>
     table: {
       minWidth: 650,
     },
-    tabContent: {
-      marginTop: theme.spacing(2),
-    },
   })
 );
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: any;
-  value: any;
+interface StorageProps {
+  subItem: string;
 }
 
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box p={3}>{children}</Box>}
-    </div>
-  );
-}
-
-const Storage: React.FC = () => {
+const Storage: React.FC<StorageProps> = ({ subItem }) => {
   const classes = useStyles();
-  const [value, setValue] = useState(0);
-
-  const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
-    setValue(newValue);
-  };
 
   // Dummy data
   const configMaps = [
@@ -130,105 +101,153 @@ const Storage: React.FC = () => {
     },
   ];
 
+  const recentStorageResources = [
+    { name: "new-config", type: "ConfigMap", namespace: "default", age: "2h" },
+    { name: "api-token", type: "Secret", namespace: "api", age: "5h" },
+    {
+      name: "data-volume",
+      type: "PersistentVolumeClaim",
+      namespace: "storage",
+      age: "1d",
+    },
+  ];
+
+  const renderOverview = () => (
+    <>
+      <Typography variant="h6" className={classes.title}>
+        Recently Created Storage Resources
+      </Typography>
+      <TableContainer component={Paper}>
+        <Table
+          className={classes.table}
+          aria-label="recent storage resources table"
+        >
+          <TableHead>
+            <TableRow>
+              <TableCell>Name</TableCell>
+              <TableCell>Type</TableCell>
+              <TableCell>Namespace</TableCell>
+              <TableCell>Age</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {recentStorageResources.map((resource) => (
+              <TableRow key={resource.name}>
+                <TableCell component="th" scope="row">
+                  {resource.name}
+                </TableCell>
+                <TableCell>{resource.type}</TableCell>
+                <TableCell>{resource.namespace}</TableCell>
+                <TableCell>{resource.age}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </>
+  );
+
+  const renderConfigMaps = () => (
+    <TableContainer component={Paper}>
+      <Table className={classes.table} aria-label="configmaps table">
+        <TableHead>
+          <TableRow>
+            <TableCell>Name</TableCell>
+            <TableCell>Namespace</TableCell>
+            <TableCell align="right">Data</TableCell>
+            <TableCell>Age</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {configMaps.map((cm) => (
+            <TableRow key={cm.name}>
+              <TableCell component="th" scope="row">
+                {cm.name}
+              </TableCell>
+              <TableCell>{cm.namespace}</TableCell>
+              <TableCell align="right">{cm.dataCount}</TableCell>
+              <TableCell>{cm.age}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+
+  const renderSecrets = () => (
+    <TableContainer component={Paper}>
+      <Table className={classes.table} aria-label="secrets table">
+        <TableHead>
+          <TableRow>
+            <TableCell>Name</TableCell>
+            <TableCell>Namespace</TableCell>
+            <TableCell>Type</TableCell>
+            <TableCell align="right">Data</TableCell>
+            <TableCell>Age</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {secrets.map((secret) => (
+            <TableRow key={secret.name}>
+              <TableCell component="th" scope="row">
+                {secret.name}
+              </TableCell>
+              <TableCell>{secret.namespace}</TableCell>
+              <TableCell>{secret.type}</TableCell>
+              <TableCell align="right">{secret.dataCount}</TableCell>
+              <TableCell>{secret.age}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+
+  const renderPersistentVolumeClaims = () => (
+    <TableContainer component={Paper}>
+      <Table
+        className={classes.table}
+        aria-label="persistent volume claims table"
+      >
+        <TableHead>
+          <TableRow>
+            <TableCell>Name</TableCell>
+            <TableCell>Namespace</TableCell>
+            <TableCell>Status</TableCell>
+            <TableCell>Volume</TableCell>
+            <TableCell>Capacity</TableCell>
+            <TableCell>Access Modes</TableCell>
+            <TableCell>Age</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {persistentVolumeClaims.map((pvc) => (
+            <TableRow key={pvc.name}>
+              <TableCell component="th" scope="row">
+                {pvc.name}
+              </TableCell>
+              <TableCell>{pvc.namespace}</TableCell>
+              <TableCell>{pvc.status}</TableCell>
+              <TableCell>{pvc.volume}</TableCell>
+              <TableCell>{pvc.capacity}</TableCell>
+              <TableCell>{pvc.accessModes}</TableCell>
+              <TableCell>{pvc.age}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+
   return (
     <div className={classes.root}>
       <Typography variant="h4" className={classes.title}>
-        Storage
+        Storage - {subItem}
       </Typography>
-      <Tabs value={value} onChange={handleChange} aria-label="storage tabs">
-        <Tab label="ConfigMaps" />
-        <Tab label="Secrets" />
-        <Tab label="Persistent Volume Claims" />
-      </Tabs>
-      <TabPanel value={value} index={0}>
-        <TableContainer component={Paper}>
-          <Table className={classes.table} aria-label="configmaps table">
-            <TableHead>
-              <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Namespace</TableCell>
-                <TableCell align="right">Data</TableCell>
-                <TableCell>Age</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {configMaps.map((cm) => (
-                <TableRow key={cm.name}>
-                  <TableCell component="th" scope="row">
-                    {cm.name}
-                  </TableCell>
-                  <TableCell>{cm.namespace}</TableCell>
-                  <TableCell align="right">{cm.dataCount}</TableCell>
-                  <TableCell>{cm.age}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </TabPanel>
-      <TabPanel value={value} index={1}>
-        <TableContainer component={Paper}>
-          <Table className={classes.table} aria-label="secrets table">
-            <TableHead>
-              <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Namespace</TableCell>
-                <TableCell>Type</TableCell>
-                <TableCell align="right">Data</TableCell>
-                <TableCell>Age</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {secrets.map((secret) => (
-                <TableRow key={secret.name}>
-                  <TableCell component="th" scope="row">
-                    {secret.name}
-                  </TableCell>
-                  <TableCell>{secret.namespace}</TableCell>
-                  <TableCell>{secret.type}</TableCell>
-                  <TableCell align="right">{secret.dataCount}</TableCell>
-                  <TableCell>{secret.age}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </TabPanel>
-      <TabPanel value={value} index={2}>
-        <TableContainer component={Paper}>
-          <Table
-            className={classes.table}
-            aria-label="persistent volume claims table"
-          >
-            <TableHead>
-              <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Namespace</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Volume</TableCell>
-                <TableCell>Capacity</TableCell>
-                <TableCell>Access Modes</TableCell>
-                <TableCell>Age</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {persistentVolumeClaims.map((pvc) => (
-                <TableRow key={pvc.name}>
-                  <TableCell component="th" scope="row">
-                    {pvc.name}
-                  </TableCell>
-                  <TableCell>{pvc.namespace}</TableCell>
-                  <TableCell>{pvc.status}</TableCell>
-                  <TableCell>{pvc.volume}</TableCell>
-                  <TableCell>{pvc.capacity}</TableCell>
-                  <TableCell>{pvc.accessModes}</TableCell>
-                  <TableCell>{pvc.age}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </TabPanel>
+      {subItem === "Overview" && renderOverview()}
+      {subItem === "ConfigMaps" && renderConfigMaps()}
+      {subItem === "Secrets" && renderSecrets()}
+      {subItem === "Persistent Volume Claims" && renderPersistentVolumeClaims()}
     </div>
   );
 };
